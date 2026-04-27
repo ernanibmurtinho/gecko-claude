@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gecko": {
+      "command": "gecko-mcp",
+      "args": ["serve"]
+    }
+  }
+}
