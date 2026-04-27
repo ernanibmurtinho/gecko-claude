@@ -24,13 +24,13 @@
 #                             from (skips the tarball fetch). Used when
 #                             developing the scaffold itself.
 #   GECKO_CLAUDE_REPO         GitHub repo for the tarball.
-#                             Default: geckovision/gecko-claude.
+#                             Default: ernanibmurtinho/gecko-claude.
 #   GECKO_CLAUDE_REF          Git ref for the tarball. Default: main.
 # =============================================================================
 set -euo pipefail
 
 GECKO_MCP_REPO="${GECKO_MCP_REPO:-}"
-GECKO_CLAUDE_REPO="${GECKO_CLAUDE_REPO:-geckovision/gecko-claude}"
+GECKO_CLAUDE_REPO="${GECKO_CLAUDE_REPO:-ernanibmurtinho/gecko-claude}"
 GECKO_CLAUDE_REF="${GECKO_CLAUDE_REF:-main}"
 GECKO_CLAUDE_REPO_LOCAL="${GECKO_CLAUDE_REPO_LOCAL:-}"
 FORCE=false
@@ -104,7 +104,7 @@ else
   if ! uv tool install --force gecko-mcp 2>/dev/null; then
     warn "PyPI install failed (gecko-mcp not yet published?)"
     echo "    falling back to GitHub source"
-    uv tool install --force "git+https://github.com/geckovision/gecko-mcpay-api.git#subdirectory=packages/gecko-mcp"
+    uv tool install --force "git+https://github.com/ernanibmurtinho/gecko-mcpay-api.git#subdirectory=packages/gecko-mcp"
   fi
 fi
 ok "gecko-mcp installed"

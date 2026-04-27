@@ -78,7 +78,7 @@ After your `gecko_research` lands, five pre-baked personas help you build:
 - v2 — Privy direct integration for cryptographic per-project wallet isolation.
 - v3 — branded frontend at `app.geckovision.tech` for project dashboards + economics charts.
 
-See [`gecko-mcpay-api/docs/`](https://github.com/geckovision/gecko-mcpay-api/tree/main/docs) for the full plans.
+See [`gecko-mcpay-api/docs/`](https://github.com/ernanibmurtinho/gecko-mcpay-api/tree/main/docs) for the full plans.
 
 ## License
 
