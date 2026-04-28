@@ -99,9 +99,11 @@ if [ -n "$GECKO_MCP_REPO" ]; then
   echo "  source: $GECKO_MCP_REPO"
   uv tool install --force "$GECKO_MCP_REPO"
 else
-  # PyPI default. Until 0.1.0 ships, this fails — fall back to the canonical
-  # git+subdirectory install with a clear error.
-  if ! uv tool install --force gecko-mcp 2>/dev/null; then
+  # PyPI default. --reinstall-package gecko-core forces a fresh resolve of
+  # the workspace dep so users with a stale gecko-core 0.1.0 cached locally
+  # don't get the gecko-mcp 0.1.1 + cached gecko-core 0.1.0 import-mismatch.
+  # See docs/v1.1-backlog.md V11-07 for the observed failure mode.
+  if ! uv tool install --force --reinstall-package gecko-core gecko-mcp 2>/dev/null; then
     warn "PyPI install failed (gecko-mcp not yet published?)"
     echo "    falling back to GitHub source"
     uv tool install --force "git+https://github.com/ernanibmurtinho/gecko-mcpay-api.git#subdirectory=packages/gecko-mcp"
