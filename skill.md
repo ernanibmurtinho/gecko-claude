@@ -5,6 +5,8 @@ description: Bootstrap a Gecko-powered project in Claude Code. Installs gecko-mc
 
 # Gecko — Builder Bootstrap Platform
 
+> **Wedge:** Gecko produces grounded, adversarial verdicts on pre-ideas — a judgment you can buy, sell, or stake on.
+
 When a user pastes "Read https://app.geckovision.tech/skill.md and follow the instructions" into Claude Code, you (Claude) walk them through the four steps below. Every cent of payment runs on x402 over Solana via the user's frames.ag wallet.
 
 ## What you're installing

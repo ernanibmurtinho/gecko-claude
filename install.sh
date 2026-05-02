@@ -20,6 +20,10 @@
 # Env overrides for development (not for end users):
 #   GECKO_MCP_REPO            git URL for `uv tool install` of gecko-mcp.
 #                             Default: PyPI.
+#   GECKO_MCP_VERSION         Version tag to install from PyPI. Pinned to a
+#                             concrete release — never `latest`, never `main`.
+#                             See packages/gecko-mcp/pyproject.toml in
+#                             gecko-mcpay-api for the source of truth.
 #   GECKO_CLAUDE_REPO_LOCAL   Local path to the gecko-claude repo to copy
 #                             from (skips the tarball fetch). Used when
 #                             developing the scaffold itself.
@@ -28,6 +32,11 @@
 #   GECKO_CLAUDE_REF          Git ref for the tarball. Default: main.
 # =============================================================================
 set -euo pipefail
+
+# Pinned release tag. Bump in lockstep with packages/gecko-mcp/pyproject.toml
+# in gecko-mcpay-api when a new release is published. Do NOT use `latest` or
+# `main` — pipe-to-bash installers must be reproducible.
+GECKO_MCP_VERSION="${GECKO_MCP_VERSION:-0.1.4}"
 
 GECKO_MCP_REPO="${GECKO_MCP_REPO:-}"
 GECKO_CLAUDE_REPO="${GECKO_CLAUDE_REPO:-ernanibmurtinho/gecko-claude}"
@@ -95,21 +104,34 @@ ok "Claude Code CLI present"
 
 hdr "2/4  Install gecko-mcp"
 
+# Idempotency: if `bb` already resolves to the pinned version, skip the
+# install entirely. uv tool install --force would otherwise re-download and
+# rebuild on every pipe-to-bash, which is wasteful and noisy.
+INSTALLED_VERSION=""
+if command -v bb >/dev/null 2>&1; then
+  INSTALLED_VERSION="$(uv tool list 2>/dev/null | awk '/^gecko-mcp /{print $2; exit}')"
+fi
+
 if [ -n "$GECKO_MCP_REPO" ]; then
   echo "  source: $GECKO_MCP_REPO"
   uv tool install --force "$GECKO_MCP_REPO"
+  ok "gecko-mcp installed (from override)"
+elif [ "$INSTALLED_VERSION" = "v${GECKO_MCP_VERSION}" ] || [ "$INSTALLED_VERSION" = "${GECKO_MCP_VERSION}" ]; then
+  ok "gecko-mcp ${GECKO_MCP_VERSION} already installed"
 else
-  # PyPI default. --reinstall-package gecko-core forces a fresh resolve of
-  # the workspace dep so users with a stale gecko-core 0.1.0 cached locally
-  # don't get the gecko-mcp 0.1.1 + cached gecko-core 0.1.0 import-mismatch.
-  # See docs/v1.1-backlog.md V11-07 for the observed failure mode.
-  if ! uv tool install --force --reinstall-package gecko-core gecko-mcp 2>/dev/null; then
-    warn "PyPI install failed (gecko-mcp not yet published?)"
-    echo "    falling back to GitHub source"
-    uv tool install --force "git+https://github.com/ernanibmurtinho/gecko-mcpay-api.git#subdirectory=packages/gecko-mcp"
+  # PyPI default. Pin a concrete version — never `latest` — so a re-run on
+  # day N installs the exact same code as day 1. --reinstall-package
+  # gecko-core forces a fresh resolve of the workspace dep so users with a
+  # stale gecko-core cached locally don't get an import-mismatch.
+  # See docs/v1.1-backlog.md V11-07 for the original observed failure mode.
+  echo "  source: PyPI (gecko-mcp==${GECKO_MCP_VERSION})"
+  if ! uv tool install --force --reinstall-package gecko-core "gecko-mcp==${GECKO_MCP_VERSION}" 2>/dev/null; then
+    warn "PyPI install failed (gecko-mcp==${GECKO_MCP_VERSION} not yet published?)"
+    echo "    falling back to GitHub source at the pinned tag"
+    uv tool install --force "git+https://github.com/ernanibmurtinho/gecko-mcpay-api.git@v${GECKO_MCP_VERSION}#subdirectory=packages/gecko-mcp"
   fi
+  ok "gecko-mcp installed (${GECKO_MCP_VERSION})"
 fi
-ok "gecko-mcp installed"
 
 # -----------------------------------------------------------------------------
 
